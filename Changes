@@ -1,0 +1,6 @@
+19.101  Fri Jul 27 19:13:17 GMT 2001
+    * Fixed bug with localtime(time) and gmtime(time)
+    * localtime mistakenly returning gmtime
+
+19.100  Sat Apr  1 20:52:37 GMT 2001
+    * First version

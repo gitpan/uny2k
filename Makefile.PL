@@ -29,10 +29,38 @@ CHANGE_WARN
 
 WriteMakefile(
     NAME            => $PACKAGE,
-    VERSION_FROM    => "$PACKAGE_FILE.pm", # finds $VERSION
-    PREREQ_PM       => {   },
+    VERSION_FROM    => "lib/$PACKAGE_FILE.pm", # finds $VERSION
+    PREREQ_PM       => { 
+                        Test::More  => 0.08
+                       },
     'dist'          => { COMPRESS   => 'gzip -9',
                          SUFFIX     => '.gz',
                          DIST_DEFAULT   => 'all tardist',
                        },
 );
+
+
+{
+    package MY;
+    sub top_targets {
+        my($self) = @_;
+        my $out = "POD2TEST_EXE = pod2test\n";
+
+        $out .= $self->SUPER::top_targets(@_);
+        $out =~ s/^(pure_all\b.*)/$1 testifypods/m;
+
+        $out .= "\n\ntestifypods : \n";
+
+        foreach my $pod (keys %{$self->{MAN1PODS}},
+                         keys %{$self->{MAN3PODS}})
+        {
+            (my $test = $pod) =~ s/\.(pm|pod)$//;
+            $test =~ s/^lib\W//;
+            $test =~ s/\W/-/;
+            $test = "embedded-$test.t";
+            $out .= "\t$self->{NOECHO}\$(POD2TEST_EXE) $pod t/$test \\\n";
+        }
+
+        return $out;
+    }
+}

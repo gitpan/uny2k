@@ -1,7 +1,7 @@
 package uny2k;
 
 use vars qw($VERSION);
-$VERSION = '19.100';
+$VERSION = '19.101';
 
 use fields qw(_Year _Reaction);
 
@@ -17,7 +17,7 @@ sub new {
     my $proto = shift;
     my $class = ref $proto || $proto;
     my($year, $reaction) = @_;
-    
+
     my $self;
     {
         no strict 'refs';
@@ -44,8 +44,8 @@ sub _mk_localtime {
     my($reaction) = shift;
 	
     return sub {
-        return @_ ? localtime(@_) : localtime() unless wantarray;
-        my @t = @_ ? localtime(@_) : localtime();
+        return @_ ? localtime($_[0]) : localtime() unless wantarray;
+        my @t = @_ ? localtime($_[0]) : localtime();
         $t[5] = __PACKAGE__->new($t[5], $reaction);
         @t;
     }
@@ -53,10 +53,10 @@ sub _mk_localtime {
 
 sub _mk_gmtime {
     my($reaction) = shift;
-    
+
     return sub {
-        return @_ ? gmtime(@_) : gmtime() unless wantarray;
-        my @t = @_ ? gmtime(@_) : gmtime();
+        return @_ ? gmtime($_[0]) : gmtime() unless wantarray;
+        my @t = @_ ? gmtime($_[0]) : gmtime();
         $t[5] = __PACKAGE__->new($t[5], $reaction);
         @t;
     }
@@ -69,12 +69,12 @@ sub import {
     my $caller = caller;
 	
     $reaction = ':DIE' unless defined $reaction;
-    
+
     $reaction = $reaction eq ':WARN' ? 'warn' : 'die';
 	
     {
         no strict 'refs';
-        *{$caller . '::localtime'} 	=	&_mk_gmtime($reaction);
+        *{$caller . '::localtime'} 	=	&_mk_localtime($reaction);
         *{$caller . '::gmtime'}		=	&_mk_gmtime($reaction);
     }
 }
@@ -102,7 +102,7 @@ sub mod {
         return $self->{_Year} % $modulus;
     }
 }
-    
+
 sub concat {
     my($self, $a2, $rev) = @_;
 
@@ -147,23 +147,35 @@ to remove the broken "fix" now.
 
 uny2k will remove the most common y2k fixes in Perl:
 
-    $year = $year + 1900;
+=for example
+use uny2k;
+my $year = (localtime)[5];
 
-and
+=also begin example
+
+    $full_year = $year + 1900;
 
     $two_digit_year = $year % 100;
+
+=also end example
 
 It will change them back to their proper post-y2k values, 19100 and
 100 respectively.
 
+=for example_testing
+my $real_year = (CORE::localtime)[5];
+is( $full_year,      '19'.$real_year,   "undid + 1900 fix" );
+is( $two_digit_year, $real_year,        "undid % 100 fix"  );
+
+
 =head1 AUTHOR
 
 Michael G Schwern <schwern@pobox.com> 
-with apologies to Mark "I am not ominous" Dominous for further abuse 
+with apologies to Mark "I am not ominous" Dominus for further abuse 
 of his code.
 
 =head1 SEE ALSO
 
-y2k.pm, D'oh::Year
+y2k.pm, D'oh::Year, a good therapist
 
 =cut

@@ -1,4 +1,6 @@
-uny2k.pm
+Changes
 MANIFEST
 Makefile.PL
-test.pl
+lib/uny2k.pm
+t/embedded-uny2k.t
+t/uny2k.t
