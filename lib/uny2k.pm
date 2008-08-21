@@ -1,11 +1,11 @@
 package uny2k;
 
-use vars qw($VERSION);
-$VERSION = '19.101';
+use strict;
+use warnings;
 
-use fields qw(_Year _Reaction);
+our $VERSION = '19.108';
 
-require Carp;
+use Carp;
 
 use overload '+' => \&add,
              '%' => \&mod,
@@ -18,13 +18,9 @@ sub new {
     my $class = ref $proto || $proto;
     my($year, $reaction) = @_;
 
-    my $self;
-    {
-        no strict 'refs';
-        $self = [\%{$class.'::FIELDS'}];
-    }
-    $self->{_Year} 	= $year;
-    $self->{_Reaction}	= $reaction || 'die';
+    my $self = {};
+    $self->{_Year}      = $year;
+    $self->{_Reaction}  = $reaction || 'die';
 
     return bless $self => $class;
 }
@@ -44,7 +40,7 @@ sub _mk_localtime {
     my($reaction) = shift;
 	
     return sub {
-        return @_ ? localtime($_[0]) : localtime() unless wantarray;
+        return @_  ? localtime($_[0]) : localtime() unless wantarray;
         my @t = @_ ? localtime($_[0]) : localtime();
         $t[5] = __PACKAGE__->new($t[5], $reaction);
         @t;
@@ -55,7 +51,7 @@ sub _mk_gmtime {
     my($reaction) = shift;
 
     return sub {
-        return @_ ? gmtime($_[0]) : gmtime() unless wantarray;
+        return @_  ? gmtime($_[0]) : gmtime() unless wantarray;
         my @t = @_ ? gmtime($_[0]) : gmtime();
         $t[5] = __PACKAGE__->new($t[5], $reaction);
         @t;
@@ -64,7 +60,7 @@ sub _mk_gmtime {
 
 
 sub import {
-    () = shift;	# Dump the package.
+    () = shift; # Dump the package.
     my $reaction = shift;
     my $caller = caller;
 	
@@ -74,17 +70,19 @@ sub import {
 	
     {
         no strict 'refs';
-        *{$caller . '::localtime'} 	=	&_mk_localtime($reaction);
-        *{$caller . '::gmtime'}		=	&_mk_gmtime($reaction);
+        *{$caller . '::localtime'} = _mk_localtime($reaction);
+        *{$caller . '::gmtime'}    = _mk_gmtime($reaction);
     }
+
+    return 1;
 }
 
 sub add {
     my($self, $a2) = @_;
 
     if( $a2 == 1900 ) {
-        Carp::carp("Possible y2k fix found!  Unfixing.");
-        return 19 . $self->{_Year};
+        carp("Possible y2k fix found!  Unfixing.");
+        return "19" . $self->{_Year};
     }
     else {
         return $self->{_Year} + $a2;
@@ -95,7 +93,7 @@ sub mod {
     my($self, $modulus) = @_;
 
     if( $modulus == 100 ) {
-        Carp::carp("Possible y2k fix found!  Unfixing.");
+        carp("Possible y2k fix found!  Unfixing.");
         return $self->{_Year};
     }
     else {
@@ -115,9 +113,6 @@ sub concat {
     return $self->{_Year};
 }
 
-1;
-
-=pod
 
 =head1 NAME
 
@@ -174,8 +169,22 @@ Michael G Schwern <schwern@pobox.com>
 with apologies to Mark "I am not ominous" Dominus for further abuse 
 of his code.
 
+
+=head1 LICENSE and COPYRIGHT
+
+Copyright 2001-2008 Michael G Schwern E<lt>schwern@pobox.comE<gt>.
+
+This program is free software; you can redistribute it and/or
+modify it under the same terms as Perl itself (though why you
+would want to is beyond me).
+
+See F<http://www.perl.com/perl/misc/Artistic.html>
+
+
 =head1 SEE ALSO
 
 y2k.pm, D'oh::Year, a good therapist
 
 =cut
+
+"Yes, this code is a joke.";

@@ -1,4 +1,6 @@
-# A template for Makefile.PL used by Arena Networks.
+#!/usr/bin/perl -w
+
+# A template for Makefile.PL
 # - Set the $PACKAGE variable to the name of your module.
 # - Set $LAST_API_CHANGE to reflect the last version you changed the API 
 #   of your module.
@@ -6,13 +8,10 @@
 # Alternatively, you can say the hell with this and use h2xs.
 
 use ExtUtils::MakeMaker;
-# See lib/ExtUtils/MakeMaker.pm for details of how to influence
-# the contents of the Makefile that is written.
 
 $PACKAGE = 'uny2k';
 ($PACKAGE_FILE) = $PACKAGE =~ /(?:\::)?([^:]+)$/;
 $LAST_API_CHANGE = 0;
-
 
 eval "require $PACKAGE";
 
@@ -31,12 +30,9 @@ WriteMakefile(
     NAME            => $PACKAGE,
     VERSION_FROM    => "lib/$PACKAGE_FILE.pm", # finds $VERSION
     PREREQ_PM       => { 
-                        Test::More  => 0.08
-                       },
-    'dist'          => { COMPRESS   => 'gzip -9',
-                         SUFFIX     => '.gz',
-                         DIST_DEFAULT   => 'all tardist',
-                       },
+        Test::More  => 0.08
+    },
+    LICENSE         => 'perl'
 );
 
 
