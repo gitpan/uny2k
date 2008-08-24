@@ -3,7 +3,7 @@ package uny2k;
 use strict;
 use warnings;
 
-our $VERSION = '19.108';
+our $VERSION = '19.108_0823';
 
 use Carp;
 

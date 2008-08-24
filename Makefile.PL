@@ -45,17 +45,32 @@ WriteMakefile(
         $out .= $self->SUPER::top_targets(@_);
         $out =~ s/^(pure_all\b.*)/$1 testifypods/m;
 
-        $out .= "\n\ntestifypods : \n";
+        my @pods = (keys %{$self->{MAN1PODS}}, keys %{$self->{MAN3PODS}});
+        my @tests;
 
-        foreach my $pod (keys %{$self->{MAN1PODS}},
-                         keys %{$self->{MAN3PODS}})
+        # Build a list of test files for each POD.
+        for my $pod (@pods)
         {
             (my $test = $pod) =~ s/\.(pm|pod)$//;
             $test =~ s/^lib\W//;
             $test =~ s/\W/-/;
-            $test = "embedded-$test.t";
-            $out .= "\t$self->{NOECHO}\$(POD2TEST_EXE) $pod t/$test \\\n";
+            $test = "t/embedded-$test.t";
+
+            push @tests, $test;
         }
+
+        # Create a target for each test.
+        for my $idx (0..$#tests) {
+            my $test = $tests[0];
+            my $pod  = $pods [0];
+
+            $out .= "\n\n$test : $pod\n";
+            $out .= "\t- \$(POD2TEST_EXE) $pod $test\n";
+        }
+
+        # And the overall testifypods target
+        $out .= "\n\ntestifypods : @tests\n";
+        $out .= "\t\$(NOOP)\n";
 
         return $out;
     }
